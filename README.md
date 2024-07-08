@@ -7,6 +7,7 @@
 
 ```
 pip install PySide6
+pip install pynput
 ```
 
 ### 运行
