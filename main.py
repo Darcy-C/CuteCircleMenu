@@ -1,14 +1,36 @@
-from PySide6.QtWidgets import *
-from PySide6.QtCore import *
-from PySide6.QtGui import *
-from PySide6.QtMultimedia import QSoundEffect
-
-from pynput import mouse, keyboard
-
-import math
-from functools import partial
 import json
+import math
 import subprocess
+from functools import partial
+
+from pynput import keyboard
+from PySide6.QtGui import (
+    QPen,
+    QColor,
+    QCursor,
+    QPixmap,
+    QPainter,
+    QTransform,
+)
+from PySide6.QtCore import (
+    Qt,
+    QUrl,
+    QRect,
+    QSize,
+    QPoint,
+    QTimer,
+    Signal,
+    QObject,
+    QThread,
+    QEasingCurve,
+    QVariantAnimation,
+    QAbstractAnimation,
+)
+from PySide6.QtWidgets import (
+    QFrame,
+    QApplication,
+)
+from PySide6.QtMultimedia import QSoundEffect
 
 KEY_ALTS = [
     keyboard.Key.alt,
@@ -56,7 +78,7 @@ class Window(QFrame):
         self._hit_test_cache: list[QRect] = [None for _ in range(9)]
         self._hovered_radius: list[int] = [130 for _ in range(9)]
         self._index_hovered: int | None = None
-        self._openness = 0.0
+        self._openness: float = 0.0
 
         self.setMouseTracking(True)
 
