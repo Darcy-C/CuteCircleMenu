@@ -53,8 +53,8 @@ class Window(QFrame):
     def __init__(self):
         super().__init__()
 
-        self._hit_test_cache: list[QRect] = [None for i in range(9)]
-        self._hovered_radius: list[int] = [130 for i in range(9)]
+        self._hit_test_cache: list[QRect] = [None for _ in range(9)]
+        self._hovered_radius: list[int] = [130 for _ in range(9)]
         self._index_hovered: int | None = None
         self._openness = 0.0
 
