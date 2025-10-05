@@ -248,7 +248,7 @@ class Window(QFrame):
         )
 
         painter.save()
-        painter.setCompositionMode(QPainter.CompositionMode_Clear)
+        painter.setCompositionMode(QPainter.CompositionMode.CompositionMode_Clear)
         painter.setBrush(Qt.GlobalColor.transparent)
         painter.drawEllipse(
             QPoint(
