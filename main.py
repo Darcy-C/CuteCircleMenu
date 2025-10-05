@@ -1,3 +1,4 @@
+import sys
 import json
 import math
 import subprocess
@@ -32,9 +33,10 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtMultimedia import QSoundEffect
 
+# --- 这里是监听的Alt按键, 这里为了防止误触, 只识别右侧的Alt (Mac的Alt是Option)
 KEY_ALTS = [
-    keyboard.Key.alt,
-    keyboard.Key.alt_l,
+    # keyboard.Key.alt,
+    # keyboard.Key.alt_l,
     keyboard.Key.alt_r,
 ]
 
@@ -43,12 +45,14 @@ config = json.loads(open("./assets/config.json").read())
 
 
 def run_quicker_action(action_id: str):
-    subprocess.run(
-        [
-            "C:\Program Files\Quicker\QuickerStarter.exe",
-            f"runaction:{action_id}",
-        ]
-    )
+    # 这里做自己的触发设置, 这里只演示 Windows 端, 其他平台自行编写逻辑
+    if sys.platform == "win32":
+        subprocess.run(
+            [
+                "C:\Program Files\Quicker\QuickerStarter.exe",
+                f"runaction:{action_id}",
+            ]
+        )
 
 
 class ListenerWorker(QObject):
