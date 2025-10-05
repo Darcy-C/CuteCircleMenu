@@ -89,6 +89,14 @@ class Window(QFrame):
 
         self._hit_test_cache: list[QRect | None] = [None for _ in range(9)]
         self._hovered_radius: list[int] = [130 for _ in range(9)]
+        self._anim_for_icons: list[QVariantAnimation] = []
+        for i in range(8):
+            _anim = QVariantAnimation(self)
+            _anim.setEasingCurve(QEasingCurve.Type.InOutSine)
+            _anim.setDuration(200)
+            _anim.valueChanged.connect(partial(self._anim_set_radius, i))
+            self._anim_for_icons.append(_anim)
+
         self._index_hovered: int | None = None
         self._openness: float = 0.0
 
@@ -140,11 +148,11 @@ class Window(QFrame):
         self.listener_worker_thread.started.connect(self.listener_worker.run)
         self.listener_worker_thread.start()
 
-        self.debounce_timer = QTimer()
-        self.debounce_timer.setInterval(100)
-        self.debounce_timer.setSingleShot(True)
+        self.sound_debounce_timer = QTimer()
+        self.sound_debounce_timer.setInterval(100)
+        self.sound_debounce_timer.setSingleShot(True)
         if USE_SOUND_EFFECT:
-            self.debounce_timer.timeout.connect(self.play_sound_effect)
+            self.sound_debounce_timer.timeout.connect(self.play_sound_effect)
 
     def _on_update(self):
         if self._openness > 0.9:
@@ -184,7 +192,7 @@ class Window(QFrame):
         if self._index_hovered not in (None, 8):
             if USE_SOUND_EFFECT:
                 self.play_sound_effect(self._on_trigger_media)
-            print(self._index_hovered, "triggered")
+            print(self._index_hovered, "图标触发")
             index_s = str(self._index_hovered)
             action_id = config["action_ids"][index_s]
             if action_id:
@@ -201,11 +209,12 @@ class Window(QFrame):
         if self._hit_test_cache[0] is None:
             return
         for i, rect in enumerate(self._hit_test_cache):
-            anim = QVariantAnimation(self)
-            anim.setEasingCurve(QEasingCurve.Type.InOutSine)
-            anim.setDuration(50)
-            anim.valueChanged.connect(partial(self._anim_set_radius, i))
+            if i >= 8:
+                break
+            if rect is None:
+                continue
             current = self._hovered_radius[i]
+            anim = self._anim_for_icons[i]
 
             if rect.contains(_pos):
                 self._index_hovered = i
@@ -215,17 +224,19 @@ class Window(QFrame):
                     anim.setStartValue(current)
                     anim.setEndValue(MAX_RADIUS)
                     anim.start()
-                    self.debounce_timer.start()
+                    self.sound_debounce_timer.start()
 
-            else:
+            # 我们这里用2点距离判断是否远离该图标, 只有足够远才恢复原来的位置
+            elif (_pos - rect.center()).manhattanLength() > 120:
                 if current != 130:
                     anim.setStartValue(current)
                     anim.setEndValue(130)
                     anim.start()
+
         if not found:
             self._index_hovered = None
 
-    def _anim_set_radius(self, i, new_value):
+    def _anim_set_radius(self, i: int, new_value: float):
         self._hovered_radius[i] = new_value
         self.update()
 
