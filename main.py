@@ -52,7 +52,7 @@ def run_quicker_action(action_id: str):
     if sys.platform == "win32":
         subprocess.run(
             [
-                "C:\Program Files\Quicker\QuickerStarter.exe",
+                r"C:\Program Files\Quicker\QuickerStarter.exe",
                 f"runaction:{action_id}",
             ]
         )
