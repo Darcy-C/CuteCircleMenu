@@ -2,6 +2,7 @@ import sys
 import json
 import math
 import subprocess
+import faulthandler
 from functools import partial
 
 from pynput import keyboard
@@ -25,7 +26,6 @@ from PySide6.QtCore import (
     QThread,
     QEasingCurve,
     QVariantAnimation,
-    QAbstractAnimation,
 )
 from PySide6.QtWidgets import (
     QFrame,
@@ -56,6 +56,10 @@ def run_quicker_action(action_id: str):
                 f"runaction:{action_id}",
             ]
         )
+
+
+# 这个打开可以方便看到 segfault 时所处的python行, 非必要
+faulthandler.enable()
 
 
 class ListenerWorker(QObject):
@@ -123,17 +127,9 @@ class Window(QFrame):
         timer.start()
 
         self.openness_anim = QVariantAnimation()
-        self.openness_anim.setStartValue(0.0)
-        self.openness_anim.setEndValue(1.0)
         self.openness_anim.setEasingCurve(QEasingCurve.Type.InOutSine)
         self.openness_anim.setDuration(300)
         self.openness_anim.valueChanged.connect(self._on_openness_anim_value_changed)
-        # self.openness_anim.start()
-
-        # timer = QTimer(self)
-        # timer.setInterval(500)
-        # timer.timeout.connect(self._on_test)
-        # timer.start()
 
         self.listener_worker = ListenerWorker()
         self.listener_worker.on_pressed.connect(self._on_listener_pressed)
@@ -155,9 +151,7 @@ class Window(QFrame):
         self.update()
 
     def _on_listener_pressed(self):
-        if self._openness != 0.0:
-            return
-        self.openness_anim.setDirection(QAbstractAnimation.Direction.Forward)
+        self.openness_anim.stop()
         self.move(
             QCursor.pos()
             - QPoint(
@@ -166,6 +160,8 @@ class Window(QFrame):
             )
         )
         self.show()
+        self.openness_anim.setStartValue(self._openness)
+        self.openness_anim.setEndValue(1.0)
         self.openness_anim.start()
         if USE_SOUND_EFFECT:
             self.play_sound_effect(self._on_open_media)
@@ -178,7 +174,9 @@ class Window(QFrame):
         sound_effect.play()
 
     def _on_listener_released(self):
-        self.openness_anim.setDirection(QAbstractAnimation.Direction.Backward)
+        self.openness_anim.stop()
+        self.openness_anim.setStartValue(self._openness)
+        self.openness_anim.setEndValue(0.0)
         self.openness_anim.start()
         if self._index_hovered not in [None, 8]:
             if USE_SOUND_EFFECT:
@@ -188,13 +186,6 @@ class Window(QFrame):
             action_id = config["action_ids"][index_s]
             if action_id:
                 run_quicker_action(action_id)
-
-    def _on_test(self):
-        if self.openness_anim.direction() == QAbstractAnimation.Direction.Backward:
-            self.openness_anim.setDirection(QAbstractAnimation.Direction.Forward)
-        else:
-            self.openness_anim.setDirection(QAbstractAnimation.Direction.Backward)
-        self.openness_anim.start()
 
     def _on_openness_anim_value_changed(self, new_value: float):
         self._openness = new_value
@@ -333,6 +324,7 @@ class Window(QFrame):
 
 
 if __name__ == "__main__":
+    print("--- 右侧Alt按下后移动鼠标打开可爱圆盘啦(Mac为右侧Option) ---")
     q_app = QApplication([])
 
     w = Window()
