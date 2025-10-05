@@ -93,7 +93,7 @@ class Window(QFrame):
 
         self.setMouseTracking(True)
 
-        self.setFixedSize(420, 420)
+        self.setFixedSize(600, 600)
         self.setWindowFlags(
             Qt.WindowType.CustomizeWindowHint
             | Qt.WindowType.FramelessWindowHint
@@ -227,6 +227,7 @@ class Window(QFrame):
         self.update()
 
     def paintEvent(self, ev):
+        SIZE = 420
         painter = QPainter()
         painter.begin(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -243,8 +244,8 @@ class Window(QFrame):
                 self.width() // 2,
                 self.height() // 2,
             ),
-            (self.width() // 2 - border_width * 2) * self._openness,
-            (self.height() // 2 - border_width * 2) * self._openness,
+            (SIZE // 2 - border_width * 2) * self._openness,
+            (SIZE // 2 - border_width * 2) * self._openness,
         )
 
         painter.save()
@@ -255,8 +256,8 @@ class Window(QFrame):
                 self.width() // 2,
                 self.height() // 2,
             ),
-            self.width() // 8,
-            self.height() // 8,
+            SIZE // 8,
+            SIZE // 8,
         )
         painter.drawEllipse(
             self.mapFromGlobal(QCursor.pos()),
