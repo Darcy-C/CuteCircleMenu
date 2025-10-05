@@ -62,6 +62,7 @@ def run_quicker_action(action_id: str):
 faulthandler.enable()
 
 
+# 我们这里用的 pynput, 这里包进 QObject 利用 Signal 进入 Qt 的事件系统
 class ListenerWorker(QObject):
     on_pressed = Signal()
     on_released = Signal()
@@ -178,7 +179,9 @@ class Window(QFrame):
         self.openness_anim.setStartValue(self._openness)
         self.openness_anim.setEndValue(0.0)
         self.openness_anim.start()
-        if self._index_hovered not in [None, 8]:
+
+        # 这里的话 None 就是鼠标没有在任何一个预定的图标上, 这里 8 是中间的那个, 我们不做处理
+        if self._index_hovered not in (None, 8):
             if USE_SOUND_EFFECT:
                 self.play_sound_effect(self._on_trigger_media)
             print(self._index_hovered, "triggered")
@@ -227,7 +230,9 @@ class Window(QFrame):
         self.update()
 
     def paintEvent(self, ev):
+        # 整个圆盘的直径
         SIZE = 420
+
         painter = QPainter()
         painter.begin(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
