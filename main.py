@@ -40,7 +40,10 @@ KEY_ALTS = [
     keyboard.Key.alt_r,
 ]
 
+# --- 决定是否使用触发音效, 默认关闭
+USE_SOUND_EFFECT = False
 
+# --- 读取全局设置相关代码
 config = json.loads(open("./assets/config.json").read())
 
 
@@ -95,9 +98,12 @@ class Window(QFrame):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
-        self._on_hover_media = QUrl.fromLocalFile("./assets/sounds/on_hover.wav")
-        self._on_trigger_media = QUrl.fromLocalFile("./assets/sounds/on_trigger.wav")
-        self._on_open_media = QUrl.fromLocalFile("./assets/sounds/on_open.wav")
+        if USE_SOUND_EFFECT:
+            # fmt: off
+            self._on_hover_media = QUrl.fromLocalFile("./assets/sounds/on_hover.wav")
+            self._on_trigger_media = QUrl.fromLocalFile("./assets/sounds/on_trigger.wav")
+            self._on_open_media = QUrl.fromLocalFile("./assets/sounds/on_open.wav")
+            # fmt: on
 
         self._assets = [
             QPixmap(f"./assets/images/{i}.png").scaledToHeight(
@@ -140,7 +146,8 @@ class Window(QFrame):
         self.debounce_timer = QTimer()
         self.debounce_timer.setInterval(100)
         self.debounce_timer.setSingleShot(True)
-        self.debounce_timer.timeout.connect(self.play_sound_effect)
+        if USE_SOUND_EFFECT:
+            self.debounce_timer.timeout.connect(self.play_sound_effect)
 
     def _on_update(self):
         if self._openness > 0.9:
@@ -160,7 +167,8 @@ class Window(QFrame):
         )
         self.show()
         self.openness_anim.start()
-        self.play_sound_effect(self._on_open_media)
+        if USE_SOUND_EFFECT:
+            self.play_sound_effect(self._on_open_media)
 
     def play_sound_effect(self, media=None):
         if media is None:
@@ -172,9 +180,10 @@ class Window(QFrame):
     def _on_listener_released(self):
         self.openness_anim.setDirection(QAbstractAnimation.Direction.Backward)
         self.openness_anim.start()
-        print(self._index_hovered, "triggered")
         if self._index_hovered not in [None, 8]:
-            self.play_sound_effect(self._on_trigger_media)
+            if USE_SOUND_EFFECT:
+                self.play_sound_effect(self._on_trigger_media)
+            print(self._index_hovered, "triggered")
             index_s = str(self._index_hovered)
             action_id = config["action_ids"][index_s]
             if action_id:
