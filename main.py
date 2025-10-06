@@ -135,10 +135,10 @@ class Window(QFrame):
         timer.timeout.connect(self._on_update)
         timer.start()
 
-        self.openness_anim = QVariantAnimation()
-        self.openness_anim.setEasingCurve(QEasingCurve.Type.InOutSine)
-        self.openness_anim.setDuration(300)
-        self.openness_anim.valueChanged.connect(self._on_openness_anim_value_changed)
+        self._openness_anim = QVariantAnimation()
+        self._openness_anim.setEasingCurve(QEasingCurve.Type.InOutSine)
+        self._openness_anim.setDuration(300)
+        self._openness_anim.valueChanged.connect(self._on_openness_anim_value_changed)
 
         self.listener_worker = ListenerWorker()
         self.listener_worker.on_pressed.connect(self._on_listener_pressed)
@@ -160,7 +160,7 @@ class Window(QFrame):
         self.update()
 
     def _on_listener_pressed(self):
-        self.openness_anim.stop()
+        self._openness_anim.stop()
         self.move(
             QCursor.pos()
             - QPoint(
@@ -169,9 +169,9 @@ class Window(QFrame):
             )
         )
         self.show()
-        self.openness_anim.setStartValue(self._openness)
-        self.openness_anim.setEndValue(1.0)
-        self.openness_anim.start()
+        self._openness_anim.setStartValue(self._openness)
+        self._openness_anim.setEndValue(1.0)
+        self._openness_anim.start()
         if USE_SOUND_EFFECT:
             self.play_sound_effect(self._on_open_media)
 
@@ -183,10 +183,10 @@ class Window(QFrame):
         sound_effect.play()
 
     def _on_listener_released(self):
-        self.openness_anim.stop()
-        self.openness_anim.setStartValue(self._openness)
-        self.openness_anim.setEndValue(0.0)
-        self.openness_anim.start()
+        self._openness_anim.stop()
+        self._openness_anim.setStartValue(self._openness)
+        self._openness_anim.setEndValue(0.0)
+        self._openness_anim.start()
 
         # 这里的话 None 就是鼠标没有在任何一个预定的图标上, 这里 8 是中间的那个, 我们不做处理
         if self._index_hovered not in (None, 8):
